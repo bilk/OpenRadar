@@ -1,13 +1,5 @@
-﻿using Dalamud.Game.Command;
-using Dalamud.IoC;
-using Dalamud.Plugin;
-using System.IO;
-using Dalamud.Interface.Windowing;
-using Dalamud.Plugin.Services;
-using OpenRadar.Windows;
+﻿using OpenRadar.Windows;
 using ECommons.Configuration;
-using ECommons.DalamudServices.Legacy;
-using ECommons.Opcodes;
 using Dalamud.Game.Addon.Lifecycle;
 
 namespace OpenRadar;
@@ -23,7 +15,7 @@ public sealed class OpenRadar : IDalamudPlugin
 
     internal WindowSystem windowSystem = null!;
     internal MainWindow mainWindow = null!;
-
+    internal ConfigWindow configWindow = null!;
 
     public OpenRadar(IDalamudPluginInterface pi)
     {
@@ -35,8 +27,13 @@ public sealed class OpenRadar : IDalamudPlugin
     {
         EzConfig.Migrate<Configuration>();
         config = EzConfig.Init<Configuration>();
+
+
         windowSystem = new();
         mainWindow = new();
+        configWindow = new();
+
+    
         Svc.PluginInterface.UiBuilder.Draw += windowSystem.Draw;
         Svc.GameNetwork.NetworkMessage += Network.PFExtract;
         Svc.PfGui.ReceiveListing += Network.ListingExtract;
@@ -45,11 +42,11 @@ public sealed class OpenRadar : IDalamudPlugin
 
         Svc.PluginInterface.UiBuilder.OpenMainUi += () =>
         {
-            mainWindow.IsOpen = true;
+            configWindow.IsOpen = true;
         };
         Svc.PluginInterface.UiBuilder.OpenConfigUi += () =>
         {
-            mainWindow.IsOpen = true;
+            configWindow.IsOpen = true;
         };
         EzCmd.Add("/openradar", OnCommand);
     }
@@ -69,8 +66,19 @@ public sealed class OpenRadar : IDalamudPlugin
 
         if (subcommands.Length == 0 || args == "")
         {
-            mainWindow.IsOpen = !mainWindow.IsOpen;
+            configWindow.IsOpen = !configWindow.IsOpen;
             return;
+        }
+        else
+        {
+            switch(args)
+            {
+                case "config":
+                    configWindow.IsOpen = !configWindow.IsOpen;
+                    break;
+                default:
+                    return;
+            }
         }
     }
 }

@@ -7,16 +7,17 @@ public static class PlayerTrackInterop
 {
     public static bool Installed()
     {
-        return Svc.PluginInterface.InstalledPlugins.Any(x => x.InternalName == "PlayerTrack");
+        return Svc.PluginInterface.InstalledPlugins.Any(
+            x => x.InternalName == "PlayerTrack");
     }
 
     private static string? DatabasePath()
     {
         var configDir = Svc.PluginInterface.ConfigDirectory.Parent;
-        if (configDir != null)
-            return Path.Combine(configDir.FullName, "PlayerTrack", "data.db");
+        if (configDir == null)
+            return null;
 
-        return null;
+        return Path.Combine(configDir.FullName, "PlayerTrack", "data.db");
     }
 
     public static PlayerInfo? Extract(ulong contentId)

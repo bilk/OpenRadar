@@ -1,9 +1,5 @@
-﻿using System;
-using System.Numerics;
-using Dalamud.Bindings.ImGui;
-using Dalamud.Interface.Utility;
-using Dalamud.Interface.Utility.Raii;
-using Dalamud.Interface.Windowing;
+﻿using Dalamud.Interface.Textures.TextureWraps;
+using ECommons.ImGuiMethods;
 using Lumina.Excel.Sheets;
 
 namespace OpenRadar.Windows;
@@ -12,11 +8,11 @@ public class MainWindow : Window
 {
     public MainWindow() : base($"OpenRadar {P.GetType().Assembly.GetName().Version} ###openradar")
     {
-        Flags = ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.NoResize;
+        Flags = ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoFocusOnAppearing;
         SizeConstraints = new()
         {
-            MinimumSize = new Vector2(250, 350),
-            MaximumSize = new Vector2(250, 350)
+            MinimumSize = new Vector2(250, 300),
+            MaximumSize = new Vector2(250, 300)
         };
         P.windowSystem.AddWindow(this);
     }
@@ -38,36 +34,61 @@ public class MainWindow : Window
         {
             var listing = Network.PFListings
                 .FirstOrDefault(l => 
-                l.hostContentId == extractedPlayers.First().content_id);
+                l.hostContentId == extractedPlayers.First()!.content_id);
                 
             if (listing != null)
             {
-                ImGui.TextColoredWrapped(new Vector4(0f, 1f, 0f, 1f), listing.duty.Name.ToString());
-                ImGui.Text($"{listing.hostName} - {listing.hostWorld}");
+                ImGuiEx.TextCentered(new Vector4(0f, 1f, 0f, 1f), listing.duty.Name.ToString());
                 ImGui.Separator();
-                ImGui.Dummy(new Vector2(20,20));
-                for (int i = 0; i < listing.slotCount; i++)
+                ImGui.Dummy(new Vector2(20,10));
+
+                if (ImGui.BeginTable("Players", 3, ImGuiTableFlags.BordersH | ImGuiTableFlags.SizingFixedFit))
                 {
-                    var job = listing.jobsPresent[i];
-                    if (job.RowId != 0)
+                    ImGui.TableSetupColumn("##job");
+                    ImGui.TableSetupColumn("Name");
+                    ImGui.TableSetupColumn("World");
+                    ImGui.TableHeadersRow();
+                    for (int i = 0; i < listing.slotCount; i++)
                     {
-                        ImGui.Text($"[{job.Abbreviation.GetText().ToString()}] -");
-                        ImGui.SameLine();
-                        var player = extractedPlayers[i];
-                        if (!player.name.IsNullOrEmpty())
+                        var job = listing.jobsPresent[i];
+                        ImGui.TableNextRow();
+                        ImGui.TableNextColumn();
+                        if (job.RowId != 0)
                         {
-                            ImGui.Text($"{player.name} - {player.world}");
+                            var jobIcon = Util.GetJobIcon(job.RowId);
+                            if (jobIcon != null)
+                                ImGui.Image(jobIcon.Handle, new Vector2(20,20));
+                            else
+                                ImGui.Image(Util.GetJobIcon(45)!.Handle, new Vector2(20,20));
+                            ImGui.TableNextColumn();
+                            var player = extractedPlayers[i];
+                            if (player != null && !player.name.IsNullOrEmpty())
+                            {
+                                if (i == 0)
+                                    ImGui.TextColored(new Vector4(0f, 0.3f, 1f, 1f), player.name);
+                                else
+                                    ImGui.Text(player.name);
+                            }
+                            else
+                            {
+                                ImGui.TextColored(new Vector4(1f, 0.2f, 0f, 1f), "Player Missing");
+                            }
+                            ImGui.TableNextColumn();
+                            if (player != null && !player.world.IsNullOrEmpty())
+                            {
+                                var world = Svc.Data.GetExcelSheet<World>().First(world => world.RowId == player.world!.ParseInt()).InternalName.ExtractText();
+                                ImGui.Text(world);
+                            }
+
                         }
                         else
                         {
-                            ImGui.Text("Player Missing");
+                            ImGui.TableNextColumn();
+                            ImGui.Text("Empty");
                         }
                     }
-                    else
-                    {
-                        ImGui.Text("Empty");
-                    }
                 }
+                ImGui.EndTable();
             }
         }
         else
