@@ -27,7 +27,7 @@ public static class PlayerTrackInterop
 
         if (!Installed())
         {
-            Svc.Log.Error($"PlayerTrack is not installed.");
+            Svc.Log.Warning($"PlayerTrack is not installed.");
             return null;
         }
 

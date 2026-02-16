@@ -7,7 +7,7 @@ public static class TaskFriendInfoFetch
 {
     public static void Enqueue(ulong contentId)
     {
-            P.taskManager.Enqueue(() => FriendInfoFetch(contentId));
+            P.taskManager.Insert(() => FriendInfoFetch(contentId));
     }
 
     private unsafe static bool FriendInfoFetch(ulong contentId)

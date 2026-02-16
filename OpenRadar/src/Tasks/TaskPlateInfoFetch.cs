@@ -12,7 +12,7 @@ public static class TaskPlateInfoFetch
 
     private unsafe static bool PlateInfoFetch(ulong contentId)
     {
-        if (!EzThrottler.Throttle("PlateInfo", 900))
+        if (!EzThrottler.Throttle("PlateInfo", 1000))
             return false; 
         Svc.Log.Debug($"3 - Fetching and Parsing Player Packet {contentId}");
         // yes im opening the adventurer card and not showing it, idk how to simulate the zoneup packet without opening the addon
