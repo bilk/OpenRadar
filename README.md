@@ -1,5 +1,5 @@
 ## Description
-This plugin is an open source version of PFRadar which uses PlayerTrack's database to relate content_ids of players with their respective name and world disabling the requirement of fetching and posting data to and from an external database.
+This plugin is an open source version of PFRadar which uses PlayerTrack's database, its own database and Adventurer Plate packets to relate content_ids of players with their respective name and world disabling the requirement of fetching and posting data to and from an external database.
 
 ## Motive
 PFRadar is a closed source and obfuscated Dalamud plugin that gets player information from a Chinese VPS to relate the retrieved content_ids from party finder packets to player names and worlds. Although the plugin states the data is anonymised and only data required is retrieved, it is a threat to the security and privacy of the user. This plugin allows for the same functionality as PFRadar, although less effective (use of a local database will be inferior to that of a larger one).
