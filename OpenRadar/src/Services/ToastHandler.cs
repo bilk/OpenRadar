@@ -10,6 +10,7 @@ public static class ToastHandler
     {
         if (Util.ContainsSeString(message, "Plate"))
         {
+            // should create flag to state its querying pf post to prevent editing toast when not in use
             message = "";
         }
     }
