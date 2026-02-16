@@ -71,6 +71,12 @@ public static class Network
         }
     }
 
+    public unsafe static void ListingHostExtract(IPartyFinderListing listing, IPartyFinderListingEventArgs args)
+    {
+        var playerInfo = new PlayerInfo(listing.ContentId, listing.Name.TextValue, (ushort)listing.HomeWorld.RowId);
+        Database.AddPlayer(playerInfo); 
+    }
+
     private unsafe static PlayerInfo FetchPlatePacketInfo(nint ptr)
     {
         var contentId = *((ulong*)ptr+2);
