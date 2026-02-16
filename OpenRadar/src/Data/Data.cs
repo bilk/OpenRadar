@@ -12,7 +12,6 @@ public static class Data
     {
         if (playerInfo == null)
             return;
-
         int index = ExtractedContentIds.IndexOf(playerInfo.content_id);
 
         if (index >= 0 && index < ExtractedPlayers.Count)

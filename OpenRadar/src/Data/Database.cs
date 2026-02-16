@@ -44,14 +44,13 @@ public static class Database
         command.ExecuteNonQuery();
     }
 
-    public static void AddPlayer(ulong contentId, string name, ushort worldId)
+    public static void AddPlayer(PlayerInfo playerInfo)
     {
         var path = GetPath();
         if (path.IsNullOrEmpty())
         {
             return;
         }
-
         using var connection = new SqliteConnection($"Data Source={path}");
         connection.Open();
 
@@ -65,9 +64,9 @@ public static class Database
                 WorldId = excluded.WorldId;
         ";
 
-        command.Parameters.AddWithValue("$contentId", (long)contentId);
-        command.Parameters.AddWithValue("$name", name);
-        command.Parameters.AddWithValue("$worldId", worldId);
+        command.Parameters.AddWithValue("$contentId", (long)playerInfo.content_id);
+        command.Parameters.AddWithValue("$name", playerInfo.name);
+        command.Parameters.AddWithValue("$worldId", playerInfo.world);
 
         command.ExecuteNonQuery();
     }

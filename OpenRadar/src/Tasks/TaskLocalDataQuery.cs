@@ -9,10 +9,10 @@ public static class TaskLocalDataQuery
 
     private static void LocalDataQuery(ulong contentId)
     {
+        Svc.Log.Debug($"2 - Querying Local Database: {contentId}");
         var playerInfo = Database.GetPlayerByContentId(contentId);
         if (playerInfo == null)
         {
-            Svc.Log.Information("Fetching and Parsing Plate Packet");
             TaskPlateInfoFetch.Enqueue(contentId);
         }
         else

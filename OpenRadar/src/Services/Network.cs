@@ -43,8 +43,12 @@ public static class Network
             {
                 //Util.PrintData<ulong>(dataPtr, 10, 10);
 
-                var player = FetchPlatePacketInfo(dataPtr);
-                Data.UpdatePlayerList(player);
+                var player = FetchPlatePacketInfo(dataPtr);  
+                if (player!=null)
+                {
+                    Database.AddPlayer(player);           
+                    Data.UpdatePlayerList(player);
+                }
             }
         }
     }

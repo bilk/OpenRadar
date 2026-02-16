@@ -11,10 +11,10 @@ public static class TaskPlayerTrackQuery
     {
         if (contentId != 0)
         {
+            Svc.Log.Debug($"1 - Querying PlayerTrack: {contentId}");
             var playerInfo = PlayerTrackInterop.Extract(contentId);
             if (playerInfo == null)
             {
-                Svc.Log.Information("Querying Local Database");
                 TaskLocalDataQuery.Enqueue(contentId);
             }
             else

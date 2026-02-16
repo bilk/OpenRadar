@@ -56,7 +56,6 @@ public static class PlayerTrackInterop
 
         if (!playerFound)
         {
-            Svc.Log.Debug("No player was found matching given content_id.");
             return null;
         }
         return new PlayerInfo 
