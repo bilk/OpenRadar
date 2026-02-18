@@ -1,3 +1,7 @@
+using System.ComponentModel.Design;
+using Dalamud.Game;
+using Dalamud.Plugin.SelfTest;
+using ECommons.EzHookManager;
 using ECommons.Throttlers;
 using FFXIVClientStructs.FFXIV.Client.UI.Agent;
 
@@ -12,15 +16,11 @@ public static class TaskPlateInfoFetch
 
     private unsafe static bool PlateInfoFetch(ulong contentId)
     {
-        if (!EzThrottler.Throttle("PlateInfo", 1000))
+        if (!EzThrottler.Throttle("PlateInfo", 200))
             return false; 
         Svc.Log.Debug($"3 - Fetching and Parsing Player Packet {contentId}");
-        // yes im opening the adventurer card and not showing it, idk how to simulate the zoneup packet without opening the ui
-        var agentCharaCard = AgentCharaCard.Instance();
-        agentCharaCard->OpenCharaCard(contentId);
-        agentCharaCard->Hide();
+        P.Memory.RequestPlateInfo(contentId);
         Network.FailedContentId = contentId;
-
         return true;
     }
 }

@@ -2,6 +2,8 @@
 using ECommons.Configuration;
 using Dalamud.Game.Addon.Lifecycle;
 using ECommons.Automation.NeoTaskManager;
+using Dalamud.Game;
+using Dalamud.Utility.Signatures;
 
 namespace OpenRadar;
 
@@ -19,6 +21,7 @@ public sealed class OpenRadar : IDalamudPlugin
     internal ConfigWindow configWindow = null!;
 
     internal TaskManager taskManager = null!;
+    internal Memory Memory = null!;
 
     public OpenRadar(IDalamudPluginInterface pi)
     {
@@ -31,6 +34,7 @@ public sealed class OpenRadar : IDalamudPlugin
         EzConfig.Migrate<Configuration>();
         config = EzConfig.Init<Configuration>();
 
+        Memory = new();
 
         windowSystem = new();
         mainWindow = new();

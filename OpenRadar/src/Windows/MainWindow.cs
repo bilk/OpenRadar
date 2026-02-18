@@ -20,8 +20,8 @@ public class MainWindow : Window
         Flags = ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoFocusOnAppearing;
         SizeConstraints = new()
         {
-            MinimumSize = new Vector2(400, 300),
-            MaximumSize = new Vector2(400, 300)
+            MinimumSize = new Vector2(400, 275),
+            MaximumSize = new Vector2(400, 275)
         };
         P.windowSystem.AddWindow(this);
     }
@@ -57,19 +57,20 @@ public class MainWindow : Window
                     ImGui.TableSetupColumn("World", ImGuiTableColumnFlags.None, 100f);
                     ImGui.TableSetupColumn("Prog", ImGuiTableColumnFlags.None, 80f);
                     ImGui.TableHeadersRow();
-                    for (int i = 0; i < listing.jobIds.Count; i++)
+                    for (int i = 0; i < listing.contentIds.Count; i++)
                     {
-                        var job = listing.jobIds[i];
+                        var jobIcon = listing.jobIcons[i];
                         ImGui.TableNextRow();
                         ImGui.TableNextColumn();
-                        if (job != 0)
+                        
+                        if (jobIcon != null)
                         {
                             var player = extractedPlayers[i];
-                            var jobIcon = Util.GetJobIcon(job);
-                            if (jobIcon != null)
-                                ImGui.Image(jobIcon.Handle, new Vector2(20,20));
-                            else
-                                ImGui.Image(Util.GetJobIcon(45)!.Handle, new Vector2(20,20));
+                            var wrap = jobIcon.GetWrapOrDefault();
+                            if (wrap != null)
+                            {
+                                ImGui.Image(wrap.Handle, new Vector2(20,20));
+                            }
                             ImGui.TableNextColumn();
                             if (player != null && !player.name.IsNullOrEmpty())
                             {   
@@ -89,8 +90,16 @@ public class MainWindow : Window
                             ImGui.TableNextColumn();
                             var prog = Data.ProgPoints[i];
 
-                            if (prog != null)
-                                ImGui.Text(prog);
+                            if (prog == "fresh")
+                            {
+                                ImGui.TextColored(new Vector4(1f, 0f, 0f, 1f), "Fresh");
+                            }
+                            else if (prog == "done")
+                            {
+                                ImGui.TextColored(new Vector4(0f, 1f, 0.2f, 1f), "Cleared");
+                            }
+                            else if (prog != null)
+                                ImGui.TextColored(new Vector4(1f, 0.7f, 0.2f, 1f), prog);
                             else
                             {
                                 using (var font = ImRaii.PushFont(UiBuilder.IconFont))
@@ -101,9 +110,11 @@ public class MainWindow : Window
                         }
                         else
                         {
-                            ImGui.Image(Util.GetJobIcon(45)!.Handle, new Vector2(20,20));
+                            var roleIcon = listing.roleIcons[i];
+                            if (roleIcon != null)
+                                ImGui.Image(roleIcon.Handle, new Vector2(20,20));
                             ImGui.TableNextColumn();
-                            ImGui.TextColored(new Vector4(0f, 1f, 0.2f, 1f), "Empty");
+                            ImGui.TextColored(new Vector4(0f, 1f, 0.2f, 1f), "-");
                         }
                     }
                 }

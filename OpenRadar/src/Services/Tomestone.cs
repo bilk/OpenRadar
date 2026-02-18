@@ -134,7 +134,7 @@ public static class Tomestone
                 }; // progression and activity do not exist, therefore not started at all
             }
         }
-        return "notstarted";
+        return "fresh";
     }
 
 
@@ -157,7 +157,7 @@ public static class Tomestone
             var dutyCategory = selectedExpansion![dutyInfo.category] as JArray;
 
             if (dutyCategory!.Count == 0)
-                return "notstarted";
+                return "fresh";
 
 
             if (!dutyInfo.savageParent.IsNullOrEmpty())
@@ -175,7 +175,7 @@ public static class Tomestone
                             return prog;
                     }
                 }
-                return "notstarted";
+                return "fresh";
             }
             return ParseLoop(dutyCategory, dutyInfo);
         }

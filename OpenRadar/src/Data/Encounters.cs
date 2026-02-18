@@ -1,3 +1,4 @@
+using System.IO;
 using Lumina.Excel.Sheets;
 using Serilog.Filters;
 
@@ -70,5 +71,18 @@ public static class Encounters
         }
 
         return new Info(contentCategory, dutyNameClean, dutyExpansion);
+    }
+
+    public static Vector4 ProgToColour(string prog, string dutyName)
+    {
+        // grey
+        // green
+        // blue
+        // purple
+        // orange
+        // pink
+        
+
+        return new Vector4(1f, 1f, 1f, 1f);
     }
 }
