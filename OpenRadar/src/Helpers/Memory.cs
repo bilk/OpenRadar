@@ -33,7 +33,7 @@ public unsafe class Memory : IDisposable
     [Signature("E8 ?? ?? ?? ?? 49 8D 9D ?? ?? ?? ?? BF", DetourName = nameof(OnFriendInfoPacketReceiveDetour))]
     private Hook<OnFriendInfoPacketReceiveDelegate> onFriendInfoPacketReceiveHook = null!;
 
-    private delegate void OnPlateInfoPacketFailDelegate(ulong* param_1, int param_2);
+    private delegate void OnPlateInfoPacketFailDelegate(ulong* param_1, int* param_2);
     [Signature("E8 ?? ?? ?? ?? 88 9E ?? ?? ?? ?? E9 ?? ?? ?? ?? E8 ?? ?? ?? ?? 84 C0 0F 84 ?? ?? ?? ?? 49 83 C6", DetourName = nameof(OnPlateInfoPacketFailDetour))]
     private Hook<OnPlateInfoPacketFailDelegate> onPlateInfoPacketFailHook = null!;
 
@@ -57,7 +57,7 @@ public unsafe class Memory : IDisposable
         handleCurrentCharaCardDataPacketHook.Original(param_1, dataPtr);
     }
 
-    private void OnPlateInfoPacketFailDetour(ulong* param_1, int param_2)
+    private void OnPlateInfoPacketFailDetour(ulong* param_1, int* param_2)
     {
         TaskFriendInfoFetch.Enqueue(Network.FailedContentId);
         onPlateInfoPacketFailHook.Original(param_1, param_2);

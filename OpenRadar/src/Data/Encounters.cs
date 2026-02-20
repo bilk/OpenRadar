@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.IO;
 using Lumina.Excel.Sheets;
 using Serilog.Filters;
@@ -76,25 +77,33 @@ public static class Encounters
     public static Vector4 ProgToColour(string prog, string dutyName)
     {
         // first decypher prog
+        Vector4 fail = new Vector4(1f, 1f, 1f, 1f);
         string[] progParts = prog.Split(' ');
+        bool ultimate = false;
+        float? progPercent = null;
         if (progParts.Length > 1)
         {
-            // ultimate!
+            ultimate = true;
         }
-        else
+        var cleaned = progParts[0].Replace("%", "");
+        if (float.TryParse(cleaned, out float parsed))
         {
-            // not ultimate
+            progPercent = parsed;
         }
+        if (progPercent == null || ultimate)
+        {
+            return fail;
+        }
+        float p = progPercent.Value;
 
-
-        // grey
-        // green
-        // blue
-        // purple
-        // orange
-        // pink
-        
-
-        return new Vector4(1f, 1f, 1f, 1f);
+        return p switch
+        {
+            >= 75f => new Vector4(0.333f, 0.333f, 0.333f, 1f),    // Grey
+            >= 50f => new Vector4(0.118f, 1f, 0f, 1f),          // Green
+            >= 25f => new Vector4(0f, 0.439f, 1f, 1f),        // Blue
+            >= 10f => new Vector4(0.639f, 0.208f, 0.933f, 1f),        // Purple
+            >= 3f => new Vector4(1f, 0.502f, 0f, 1f),         // Orange
+            _      => new Vector4(0.887f, 0.408f, 0.659f, 1f)         // Pink
+        };
     }
 }

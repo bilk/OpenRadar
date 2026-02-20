@@ -96,10 +96,14 @@ public class MainWindow : Window
                             }
                             else if (prog == "done")
                             {
-                                ImGui.TextColored(new Vector4(0f, 1f, 0.2f, 1f), "Cleared");
+                                ImGui.TextColored(new Vector4(0.898f, 0.8f, 0.502f, 1f), "Cleared");
+                            }
+                            else if (prog == "hidden")
+                            {
+                                ImGui.TextColored(new Vector4(1f, 1f, 1f, 0.25f), "Hidden");
                             }
                             else if (prog != null)
-                                ImGui.TextColored(new Vector4(1f, 0.7f, 0.2f, 1f), prog);
+                                ImGui.TextColored(Encounters.ProgToColour(prog, ""), prog);
                             else
                             {
                                 using (var font = ImRaii.PushFont(UiBuilder.IconFont))
