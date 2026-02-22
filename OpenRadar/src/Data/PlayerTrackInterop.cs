@@ -1,5 +1,5 @@
 using System.IO;
-using Microsoft.Data.Sqlite;
+using System.Data.SQLite;
 
 namespace OpenRadar;
 
@@ -39,7 +39,7 @@ public static class PlayerTrackInterop
         }
 
 
-        using var dbConnection = new SqliteConnection($"Data Source={dbPath}");
+        using var dbConnection = new SQLiteConnection($"Data Source={dbPath}");
         dbConnection.Open();
 
         using var command = dbConnection.CreateCommand();

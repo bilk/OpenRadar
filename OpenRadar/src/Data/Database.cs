@@ -1,5 +1,5 @@
 using System.IO;
-using Microsoft.Data.Sqlite;
+using System.Data.SQLite;
 
 namespace OpenRadar;
 
@@ -27,7 +27,7 @@ public static class Database
 
     private static void CreateDatabase(string path)
     {
-        using var connection = new SqliteConnection($"Data Source={path}");
+        using var connection = new SQLiteConnection($"Data Source={path}");
         connection.Open();
 
         var command = connection.CreateCommand();
@@ -50,7 +50,7 @@ public static class Database
         {
             return;
         }
-        using var connection = new SqliteConnection($"Data Source={path}");
+        using var connection = new SQLiteConnection($"Data Source={path}");
         connection.Open();
 
         var command = connection.CreateCommand();
@@ -78,7 +78,7 @@ public static class Database
             return null;
         }
 
-        using var connection = new SqliteConnection($"Data Source={path}");
+        using var connection = new SQLiteConnection($"Data Source={path}");
         connection.Open();
 
         var command = connection.CreateCommand();
