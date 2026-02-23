@@ -33,8 +33,9 @@ public class MainWindow : Window
         if (extractedPlayers.Count > 0)
         {
             var listing = Data.CurrentPost;
-                
-            if (listing != null)
+            if (listing.isPrivate)
+                ImGuiEx.TextCentered(new Vector4(1f, 0f, 0f, 1f), "Private PF");
+            else if (listing != null)
             {
                 var dutyName = Util.DutyIdToName(listing.dutyId);
                 ImGuiEx.TextCentered(new Vector4(0f, 1f, 0f, 1f), dutyName);

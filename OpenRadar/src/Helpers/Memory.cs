@@ -15,7 +15,7 @@ public unsafe class Memory : IDisposable
     [Signature("40 53 48 81 EC 80 0F 00 00 48 8B 05 ?? ?? ?? ?? 48 33 C4 48 89 84 24 70 0F 00 00 48 8B 0D ?? ?? ?? ?? 48 8B DA E8 ?? ?? ?? ?? 45 33 C9 C7 44 24 20 B0 00 00 00 45 33 C0 48 C7 44 24 28 20 00 00 00 48 8D 54 24 20 48 89 5C 24 40 48 8B C8 C7 44 24 48 01 00 00 00")]
     private RequestPlateInfoDelegate callRequestPlateInfo = null!;
 
-    private delegate void ListingPacketHandlerDelegate(ulong param_1, long* param_2);
+    private delegate void ListingPacketHandlerDelegate(ulong param_1, ulong* param_2);
     [Signature("48 89 5C 24 18 55 48 8D AC 24 60 FC FF FF", DetourName = nameof(ListingPacketHandlerDetour))]
     private Hook<ListingPacketHandlerDelegate> listingPacketHandlerHook = null!;
 
@@ -31,11 +31,27 @@ public unsafe class Memory : IDisposable
     [Signature("40 53 48 83 EC ?? 8B 05 ?? ?? ?? ?? 48 8B DA", DetourName = nameof(CharaCardPacketHandlerDetour))]
     private Hook<CharaCardPacketHandlerDelegate> charaCardPacketHandlerHook = null!;
 
-    private void ListingPacketHandlerDetour(ulong param_1, long* dataPtr)
+    private void ListingPacketHandlerDetour(ulong param_1, ulong* dataPtr)
     {
-        Util.PrintData<byte>((nint)dataPtr, 20, 20);
+        // ghidra's packet extractor, lot of these mean something, not sure
+        // var local448 = *(uint*)(dataPtr + 8);
+        // var local444 = *(uint*)((long)dataPtr + 0x44);
+        // var local440 = *(uint*)(dataPtr + 9);
+        // var local43c = *(uint*)((long)dataPtr + 0x4c);
+        // var local438 = *(ushort*)(dataPtr + 10);
+        // var local436 = *(ushort*)((long)dataPtr + 0x52);
+        // var local434 = *(ushort*)((long)dataPtr + 0x54);
+        // var local432 = *(byte*)((long)dataPtr + 0x56);
+        // var local431 = *(byte*)((long)dataPtr + 0x57);
+        // var local430 = *(byte*)(dataPtr + 0xb);
+        // var local42f = *(byte*)((long)dataPtr + 0x59);
+        // var local42e = *(byte*)((long)dataPtr + 0x5a);
+        var privateByte = *(byte*)((long)dataPtr + 0x5b);
+        // var local42c = *(byte*)((long)dataPtr + 0x5c);
+        // var local18 = *(byte*)(dataPtr + 0x39);
+        bool isPrivate = privateByte == 3 || privateByte == 35;
         ushort dutyId = *((ushort*)dataPtr + 20);
-        CurrentPost = new PostInfo(dutyId, new List<ISharedImmediateTexture?>(), new List<IDalamudTextureWrap?>(), new List<ulong>());
+        CurrentPost = new PostInfo(dutyId, isPrivate, new List<ISharedImmediateTexture?>(), new List<IDalamudTextureWrap?>(), new List<ulong>());
         for (int i = 0; i < 8; i++)
         {
             ulong content_id = *((ulong*)dataPtr + i + 12);

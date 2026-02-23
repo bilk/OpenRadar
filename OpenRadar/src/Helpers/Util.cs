@@ -88,11 +88,11 @@ public static class Util
 
     public static string DutyIdToName(ushort dutyId)
     {
-        var dutyName = Svc.Data.GetExcelSheet<ContentFinderCondition>().FirstOrDefault(duty => duty.RowId == dutyId).Name.ToString();
+        var duty = Svc.Data.GetExcelSheet<ContentFinderCondition>().FirstOrDefault(duty => duty.RowId == dutyId);
 
-        if (dutyName.IsNullOrEmpty())
+        if (duty.Equals(default(ContentFinderCondition)) || string.IsNullOrEmpty(duty.Name.ToString()))
             return "Unknown Duty";
-
+        var dutyName = duty.Name.ToString();
         return char.ToUpper(dutyName[0]) + dutyName.Substring(1);
     }
 }

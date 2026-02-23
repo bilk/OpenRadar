@@ -7,7 +7,7 @@ namespace OpenRadar;
 
 public static class Data
 {
-    public static PostInfo CurrentPost = new PostInfo(0, new List<ISharedImmediateTexture?>(), new List<IDalamudTextureWrap?>(), new List<ulong>());
+    public static PostInfo CurrentPost = new PostInfo(0, false, new List<ISharedImmediateTexture?>(), new List<IDalamudTextureWrap?>(), new List<ulong>());
     public static List<PlayerInfo?> ExtractedPlayers = Enumerable.Repeat<PlayerInfo?>(null, 8).ToList();
     public static List<string?> ProgPoints = Enumerable.Repeat<string?>(null, 8).ToList();
 
@@ -34,7 +34,7 @@ public static class Data
     public static void ResetExtractedData()
     {
         //ExtractedContentIds = Enumerable.Repeat<ulong>(0, 8).ToList();
-        CurrentPost = new PostInfo(0, new List<ISharedImmediateTexture?>(), new List<IDalamudTextureWrap?>(), new List<ulong>());
+        CurrentPost = new PostInfo(0, false, new List<ISharedImmediateTexture?>(), new List<IDalamudTextureWrap?>(), new List<ulong>());
         ExtractedPlayers = Enumerable.Repeat<PlayerInfo?>(null, 8).ToList();
         ProgPoints = Enumerable.Repeat<string?>(null, 8).ToList();
     }
@@ -49,6 +49,7 @@ public static class Data
     public record PostInfo
     (
         ushort dutyId,
+        bool isPrivate,
         //List<byte> jobIds,
         List<ISharedImmediateTexture?> jobIcons,
         List<IDalamudTextureWrap?> roleIcons,
