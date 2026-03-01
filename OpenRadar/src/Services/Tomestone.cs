@@ -49,6 +49,10 @@ public static class Tomestone
         var dutyInfo = Encounters.DataQuery(dutyId);
         var lodestoneId = await ResolveRedirectAndGetLodestoneId(name, world);
 
+        if (lodestoneId != null)
+        {
+            Data.LodestoneIdCache[player.content_id] = lodestoneId;
+        }
         if (lodestoneId == null || dutyInfo == null)
         {
             if (!RefetchedAlready)
