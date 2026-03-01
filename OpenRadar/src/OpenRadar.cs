@@ -12,30 +12,31 @@ public sealed class OpenRadar : IDalamudPlugin
     private Configuration config = null!;
     public static Configuration C => P.config;
 
-
     public WindowSystem windowSystem = null!;
     public MainWindow mainWindow = null!;
     public ConfigWindow configWindow = null!;
 
     public TaskManager taskManager = null!;
     public Memory Memory = null!;
+    public FFLogsClient FFLogsClient = null!;
 
     public OpenRadar(IDalamudPluginInterface pi)
     {
         P = this;
         Svc.Init(pi);
-        
+
         EzConfig.Migrate<Configuration>();
         config = EzConfig.Init<Configuration>();
 
         Memory = new();
+        FFLogsClient = new();
 
         windowSystem = new();
         mainWindow = new();
         configWindow = new();
 
         taskManager = new(new(abortOnTimeout: true, timeLimitMS: 25000, showDebug: false));
-    
+
         Svc.PluginInterface.UiBuilder.Draw += windowSystem.Draw;
         Svc.PfGui.ReceiveListing += Network.ListingHostExtract;
         Svc.Toasts.ErrorToast += ToastHandler.ErrorToast;
@@ -43,14 +44,8 @@ public sealed class OpenRadar : IDalamudPlugin
 
         Svc.AddonLifecycle.RegisterListener(AddonEvent.PostDraw, "LookingForGroupDetail", AddonHandler.LookingForGroupDetail);
 
-        Svc.PluginInterface.UiBuilder.OpenMainUi += () =>
-        {
-            configWindow.IsOpen = true;
-        };
-        Svc.PluginInterface.UiBuilder.OpenConfigUi += () =>
-        {
-            configWindow.IsOpen = true;
-        };
+        Svc.PluginInterface.UiBuilder.OpenMainUi += () => { configWindow.IsOpen = true; };
+        Svc.PluginInterface.UiBuilder.OpenConfigUi += () => { configWindow.IsOpen = true; };
 
         if (C.FirstInstalled)
         {
@@ -59,16 +54,16 @@ public sealed class OpenRadar : IDalamudPlugin
             configWindow.IsOpen = true;
         }
 
-        Svc.Commands.AddHandler("/openradar" , new CommandInfo(OnCommand)
+        Svc.Commands.AddHandler("/openradar", new CommandInfo(OnCommand)
         {
             HelpMessage = "Displays Config Window"
         });
     }
 
-
     public void Dispose()
     {
         P.Memory.Dispose();
+        P.FFLogsClient.Dispose();
         Svc.PluginInterface.UiBuilder.Draw -= windowSystem.Draw;
         Svc.PfGui.ReceiveListing -= Network.ListingHostExtract;
         Svc.Toasts.ErrorToast -= ToastHandler.ErrorToast;

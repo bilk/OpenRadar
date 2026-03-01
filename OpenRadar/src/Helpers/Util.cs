@@ -1,9 +1,10 @@
-
 using Dalamud.Game.Gui.PartyFinder.Types;
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Interface.Textures;
 using Dalamud.Interface.Textures.TextureWraps;
 using Lumina.Excel.Sheets;
+using System;
+using System.Diagnostics;
 
 namespace OpenRadar;
 
@@ -11,7 +12,7 @@ public static class Util
 {
     public static ISharedImmediateTexture? GetJobIcon(byte? jobId)
     {
-        if (jobId == 0) 
+        if (jobId == 0)
             return null;
         if (jobId != null)
         {
@@ -28,18 +29,21 @@ public static class Util
         bool isDps = (jobFlags & JobRoles.DPS) != 0;
 
         int roleMask = (isTank ? 1 : 0) | (isHealer ? 2 : 0) | (isDps ? 4 : 0);
-
         // this seems bad
         var iconId = roleMask switch
         {
-            1 => 17, 2 => 18, 4 => 19,
-            3 => 30, 5 => 31, 6 => 32,
+            1 => 17,
+            2 => 18,
+            4 => 19,
+            3 => 30,
+            5 => 31,
+            6 => 32,
             7 => 33,
             _ => 20
         };
-        
+
         return Svc.PluginInterface.UiBuilder.LoadUld("ui/uld/lfgselectrole.uld").LoadTexturePart("ui/uld/LFG.tex", iconId);
-        
+
         // ui/uld/lfg.tex
         // #6 tank, #7 healer, #8 dps, #9 default
         // #10 border
@@ -94,5 +98,36 @@ public static class Util
             return "Unknown Duty";
         var dutyName = duty.Name.ToString();
         return char.ToUpper(dutyName[0]) + dutyName.Substring(1);
+    }
+
+    /// <summary>
+    /// Returns the FFLogs serverRegion string for a given world ID.
+    /// Uses the world's data-centre name to determine region.
+    /// </summary>
+    public static string WorldToRegion(ushort worldId)
+    {
+        try
+        {
+            var world = Svc.Data.GetExcelSheet<World>().First(w => w.RowId == worldId);
+            var dcRegion = world.DataCenter.Value.Region;
+
+            return dcRegion switch
+            {
+                // Japan
+                1 => "JP",
+                // North America
+                2 => "NA",
+                // Europe
+                3 => "EU",
+                // Oceania
+                4 => "OC",
+                // Fallback — NA is the safest guess for unknown DCs
+                _ => "NA"
+            };
+        }
+        catch
+        {
+            return "NA";
+        }
     }
 }

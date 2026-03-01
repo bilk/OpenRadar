@@ -10,7 +10,8 @@ public partial class Configuration
     public bool RequestPackets { get; set;} = false;
     public bool PlayerTrackReader { get; set;} = false;
     public bool QueryTomestone { get; set;} = true;
-
+    public string FFLogsClientId { get; set; } = string.Empty;
+    public string FFLogsClientSecret { get; set; } = string.Empty;
 
     public void Save()
     {
