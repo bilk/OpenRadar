@@ -37,26 +37,13 @@ public static class Encounters
         string? category,
         string name,
         string expansion,
-        //string? savageChild = null,
         string? savageParent = null
     );
 
-    public static class Colour
-    {
-        public static Vector4 Grey   = new(0.333f, 0.333f, 0.333f, 1f);
-        public static Vector4 Green  = new(0.118f, 1f, 0f, 1f);
-        public static Vector4 Blue   = new(0f, 0.439f, 1f, 1f);
-        public static Vector4 Purple = new(0.639f, 0.208f, 0.933f, 1f);
-        public static Vector4 Orange = new(1f, 0.502f, 0f, 1f);
-        public static Vector4 Pink   = new(0.887f, 0.408f, 0.659f, 1f);
-    }
     public static Info? DataQuery(ushort dutyId)
     {
         var duty = Svc.Data.GetExcelSheet<ContentFinderCondition>().FirstOrDefault(duty => duty.RowId == dutyId);
-        if (duty.RowId == 0)
-        {
-            return null;
-        }
+        if (duty.RowId == 0) return null;
 
         string? contentCategory = duty.ContentUICategory.Value.Name.ToString() switch
         {
@@ -73,9 +60,8 @@ public static class Encounters
         if (contentCategory == "savage")
         {
             var tier = SavageRowIds.FirstOrDefault(row => row.Contains(dutyId));
-            if (tier == null)
-                return null;
-
+            if (tier == null) return null;
+                
             var savageParent = Util.DutyIdToName(tier.Last());
             return new Info(contentCategory, dutyNameClean, dutyExpansion, savageParent);
         }
@@ -90,111 +76,96 @@ public static class Encounters
         string[] progParts = prog.Split(' ');
         bool ultimateOrDoor = false;
         float? progPercent = null;
-        if (progParts.Length > 1)
-            ultimateOrDoor = true;
+
+        if (progParts.Length > 1) ultimateOrDoor = true;
 
         var cleaned = progParts[0].Replace("%", "");
         if (float.TryParse(cleaned, out float parsed))
             progPercent = parsed;
 
-
-        if (progPercent == null)
-            return fail;
-
+        if (progPercent == null) return fail;
+            
         float percent = progPercent.Value;
 
         if (!ultimateOrDoor)
         {
             return percent switch
             {
-                > 75f => Colour.Grey,
-                > 50f => Colour.Green,
-                > 25f => Colour.Blue,
-                > 10f => Colour.Purple,
-                > 3f => Colour.Orange,
-                _ => Colour.Pink
+                > 75f => Col.fGrey,
+                > 50f => Col.fGreen,
+                > 25f => Col.fBlue,
+                > 10f => Col.fPurple,
+                > 3f => Col.fOrange,
+                _ => Col.fPink
             };
         }
-        else
+
+        var part = progParts[1];
+
+        if (!int.TryParse(part.AsSpan(1), out int phase)) return fail;
+
+        if (part[0] == 'I') phase = -phase;
+
+        if (!Ultimates.Contains(dutyId)) // door boss, some savageparents
         {
-            var part = progParts[1];
-
-            if (!int.TryParse(part.AsSpan(1), out int phase))
-                return fail;
-
-            if (part[0] == 'I')
-                phase = -phase;
-
-            if (!Ultimates.Contains(dutyId)) // door boss, some savageparents
+            return (percent, phase) switch
             {
-                return (percent, phase) switch
-                {
-                    (>50f, 1) => Colour.Grey,
-                    (>20f, 1) => Colour.Green,
-                    (_, 1) => Colour.Blue,
-                    (>50f, 2) => Colour.Purple,
-                    (>20f, 2) => Colour.Orange,
-                    (_, _) => Colour.Pink
-                };
-            }
-            return dutyId switch
-            {
-                1006 => phase switch // fru
-                {
-                    1 => Colour.Grey,
-                    2 => Colour.Green,
-                    3 => Colour.Blue,
-                    4 => Colour.Purple,
-                    _ when percent < 10f => Colour.Orange,
-                    _ => Colour.Pink
-                },
-                908 => phase switch // top
-                {
-                    1 => Colour.Grey,
-                    2 => Colour.Green,
-                    3 => Colour.Blue,
-                    4 => Colour.Purple,
-                    5 => Colour.Orange,
-                    _ => Colour.Pink
-                },
-                788 => phase switch // dsr
-                {
-                    <=2 => Colour.Grey,
-                    3 => Colour.Green,
-                    4 or -1 => Colour.Blue,
-                    5 => Colour.Purple,
-                    6 => Colour.Orange,
-                    _ => Colour.Pink
-                },
-                694 => phase switch // tea
-                {
-                    1 or -1 => Colour.Grey,
-                    2 => Colour.Green,
-                    -2 => Colour.Blue,
-                    3 => Colour.Purple,
-                    _ when percent > 10f => Colour.Orange,
-                    _ => Colour.Pink
-                },
-                539 => phase switch // uwu
-                {
-                    1 => Colour.Grey,
-                    2 => Colour.Green,
-                    3 => Colour.Blue,
-                    _ when percent > 50f => Colour.Purple,
-                    _ when percent > 10f => Colour.Orange,
-                    _ => Colour.Pink
-                },
-                280 => phase switch // ucob
-                {
-                    1 => Colour.Grey,
-                    2 => Colour.Green,
-                    3 => Colour.Blue,
-                    4 => Colour.Purple,
-                    _ when percent > 10f => Colour.Orange,
-                    _ => Colour.Pink
-                },
-                _ => fail
+                (>50f, 1) => Col.fGrey,
+                (>20f, 1) => Col.fGreen,
+                (_, 1) => Col.fBlue,
+                (>50f, 2) => Col.fPurple,
+                (>20f, 2) => Col.fOrange,
+                (_, _) => Col.fPink
             };
         }
+        return dutyId switch
+        {
+            1006 or 280 => phase switch // fru & ucob
+            {
+                1 => Col.fGrey,
+                2 => Col.fGreen,
+                3 => Col.fBlue,
+                4 => Col.fPurple,
+                _ when percent > 10f => Col.fOrange,
+                _ => Col.fPink
+            },
+            908 => phase switch // top
+            {
+                1 => Col.fGrey,
+                2 => Col.fGreen,
+                3 => Col.fBlue,
+                4 => Col.fPurple,
+                5 => Col.fOrange,
+                _ => Col.fPink
+            },
+            788 => phase switch // dsr
+            {
+                <=2 => Col.fGrey,
+                3 => Col.fGreen,
+                4 or -1 => Col.fBlue,
+                5 => Col.fPurple,
+                6 => Col.fOrange,
+                _ => Col.fPink
+            },
+            694 => phase switch // tea
+            {
+                1 or -1 => Col.fGrey,
+                2 => Col.fGreen,
+                -2 => Col.fBlue,
+                3 => Col.fPurple,
+                _ when percent > 10f => Col.fOrange,
+                _ => Col.fPink
+            },
+            539 => phase switch // uwu
+            {
+                1 => Col.fGrey,
+                2 => Col.fGreen,
+                3 => Col.fBlue,
+                _ when percent > 50f => Col.fPurple,
+                _ when percent > 10f => Col.fOrange,
+                _ => Col.fPink
+            },
+            _ => fail
+        };
     }
 }

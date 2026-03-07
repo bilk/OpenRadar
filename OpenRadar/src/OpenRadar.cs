@@ -3,6 +3,7 @@ using ECommons.Configuration;
 using Dalamud.Game.Addon.Lifecycle;
 using ECommons.Automation.NeoTaskManager;
 using Dalamud.Game.Command;
+using OpenRadar.UI;
 
 namespace OpenRadar;
 
@@ -73,8 +74,5 @@ public sealed class OpenRadar : IDalamudPlugin
         ECommonsMain.Dispose();
     }
 
-    private void OnCommand(string command, string args)
-    {
-        configWindow.IsOpen = !configWindow.IsOpen;
-    }
+    private void OnCommand(string command, string args) => configWindow.IsOpen = !configWindow.IsOpen;
 }

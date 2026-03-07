@@ -8,18 +8,13 @@ using System.Diagnostics;
 
 namespace OpenRadar;
 
-public static class Util
+public static partial class Util
 {
     public static ISharedImmediateTexture? GetJobIcon(byte? jobId)
     {
-        if (jobId == 0)
-            return null;
-        if (jobId != null)
-        {
-            var jobTexture = Svc.Texture.GetFromGame($"ui/icon/062000/0621{jobId}.tex");
-            return jobTexture;
-        }
-        return null;
+        if (jobId == 0 || jobId == null) return null;
+
+        return Svc.Texture.GetFromGameIcon(62100 + (uint)jobId);
     }
 
     public static IDalamudTextureWrap? JobFlagsToRoleTexture(JobFlags jobFlags)
@@ -29,7 +24,7 @@ public static class Util
         bool isDps = (jobFlags & JobRoles.DPS) != 0;
 
         int roleMask = (isTank ? 1 : 0) | (isHealer ? 2 : 0) | (isDps ? 4 : 0);
-        // this seems bad
+
         var iconId = roleMask switch
         {
             1 => 17,
@@ -42,28 +37,35 @@ public static class Util
             _ => 20
         };
 
-        return Svc.PluginInterface.UiBuilder.LoadUld("ui/uld/lfgselectrole.uld").LoadTexturePart("ui/uld/LFG.tex", iconId);
+        var uld = Svc.PluginInterface.UiBuilder.LoadUld("ui/uld/lfgselectrole.uld"); 
 
-        // ui/uld/lfg.tex
-        // #6 tank, #7 healer, #8 dps, #9 default
-        // #10 border
-        // #19 tank/healer, #20 tank/dps, #21 healer/dps, #22 tank/healer/dps
+        if (uld == null) return null;
+
+        return uld.LoadTexturePart("ui/uld/LFG.tex", iconId);
     }
 
-    public unsafe static void PrintData<T>(nint dataPtr, int totalRows, int infoPerRow) where T : unmanaged
+    /// <summary>
+    /// Prints data within given pointer to xllog. Allows for any type.
+    /// </summary>
+    public unsafe static void PrintData<T>(void* dataPtr, int totalRows = 10, int infoPerRow = 10) where T : unmanaged
     {
+#if DEBUG
+        if (dataPtr == null) return;
         T* ptr = (T*)dataPtr;
 
+        Svc.Log.Debug("──────── Data Start ────────");
         for (int row = 0; row < totalRows; row++)
         {
             string packetInfoRow = $"{row}: ";
             for (int col = 0; col < infoPerRow; col++)
             {
-                T dataPoint = *(ptr + row * infoPerRow + col);
+                T dataPoint = ptr[row * infoPerRow + col];
                 packetInfoRow += $"{dataPoint} ";
             }
             Svc.Log.Debug(packetInfoRow);
         }
+        Svc.Log.Debug("──────── Data End ────────");
+#endif
     }
 
     public unsafe static string ReadUtf8String(byte* b, int maxLength = 30, bool endAtNull = true)
@@ -78,56 +80,39 @@ public static class Util
         return System.Text.Encoding.UTF8.GetString(b, len);
     }
 
-    public static bool ContainsSeString(SeString seString, string part)
-    {
-        var fullText = seString.TextValue;
-        return fullText.Contains(part, System.StringComparison.OrdinalIgnoreCase);
-    }
 
-    public static string WorldIdToName(ushort worldId)
+    public static bool ContainsSeString(SeString seString, string part)
+        => seString.TextValue.Contains(part, StringComparison.OrdinalIgnoreCase);
+
+    public static string? WorldIdToName(ushort worldId)
     {
-        var world = Svc.Data.GetExcelSheet<World>().First(world => world.RowId == worldId).InternalName.ToString();
-        return world;
+        var world = Svc.Data.GetExcelSheet<World>().FirstOrNull(w => w.RowId == worldId);
+        if (world == null) return null;
+
+        return world.Value.InternalName.ToString();
     }
 
     public static string DutyIdToName(ushort dutyId)
     {
-        var duty = Svc.Data.GetExcelSheet<ContentFinderCondition>().FirstOrDefault(duty => duty.RowId == dutyId);
+        var duty = Svc.Data.GetExcelSheet<ContentFinderCondition>().FirstOrNull(duty => duty.RowId == dutyId);
+        if (duty == null) return "Unknown Duty";
 
-        if (duty.Equals(default(ContentFinderCondition)) || string.IsNullOrEmpty(duty.Name.ToString()))
-            return "Unknown Duty";
-        var dutyName = duty.Name.ToString();
+        var dutyName = duty.Value.Name.ToString();
         return char.ToUpper(dutyName[0]) + dutyName.Substring(1);
     }
 
-    /// <summary>
-    /// Returns the FFLogs serverRegion string for a given world ID.
-    /// Uses the world's data-centre name to determine region.
-    /// </summary>
-    public static string WorldToRegion(ushort worldId)
+    public static string? WorldToRegion(ushort worldId)
     {
-        try
-        {
-            var world = Svc.Data.GetExcelSheet<World>().First(w => w.RowId == worldId);
-            var dcRegion = world.DataCenter.Value.Region;
+        var world = Svc.Data.GetExcelSheet<World>().FirstOrNull(w => w.RowId == worldId);
+        if (world == null) return null;
 
-            return dcRegion switch
-            {
-                // Japan
-                1 => "JP",
-                // North America
-                2 => "NA",
-                // Europe
-                3 => "EU",
-                // Oceania
-                4 => "OC",
-                // Fallback — NA is the safest guess for unknown DCs
-                _ => "NA"
-            };
-        }
-        catch
+        return world.Value.DataCenter.Value.Region switch
         {
-            return "NA";
-        }
+            1 => "JP",
+            2 => "NA",
+            3 => "EU",
+            4 => "OC",
+            _ => null
+        };
     }
 }

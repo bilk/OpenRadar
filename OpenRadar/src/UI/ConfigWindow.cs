@@ -1,18 +1,14 @@
 using System.ComponentModel;
 using ECommons.GameHelpers;
 
-namespace OpenRadar.Windows;
+namespace OpenRadar.UI;
 
 public class ConfigWindow : Window
 {
     public ConfigWindow() : base($"OpenRadar {P.GetType().Assembly.GetName().Version} ###configopenradar")
     {
         Flags = ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoResize;
-        SizeConstraints = new()
-        {
-            MinimumSize = new Vector2(500, 480),
-            MaximumSize = new Vector2(500, 480)
-        };
+        Size = new Vector2(500, 480);
         P.windowSystem.AddWindow(this);
     }
 

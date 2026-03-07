@@ -1,92 +1,30 @@
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using Dalamud.Interface.Textures;
 using Dalamud.Interface.Textures.TextureWraps;
+using FFXIVClientStructs.FFXIV.Client.UI.Agent;
 using Openradar;
 
 namespace OpenRadar;
 
-public static class Data
+public static partial class Data
 {
-    public static PostInfo CurrentPost = new PostInfo(0, false, new List<ISharedImmediateTexture?>(), new List<IDalamudTextureWrap?>(), new List<ulong>());
-    public static List<PlayerInfo?> ExtractedPlayers = Enumerable.Repeat<PlayerInfo?>(null, 8).ToList();
-    public static List<string?> ProgPoints = Enumerable.Repeat<string?>(null, 8).ToList();
-    public static List<FFLogsData?> FFLogsResults = Enumerable.Repeat<FFLogsData?>(null, 8).ToList();
-
-    // Persists across PF posts — lodestone IDs don't change
-    public static ConcurrentDictionary<ulong, string> LodestoneIdCache = new();
-
-    public static void UpdatePlayerList(PlayerInfo? playerInfo)
+    public static PlayerInfo?[] ListingPlayers = new PlayerInfo?[8];
+    public static AgentLookingForGroup.Detailed? CurrentPost = null;
+    public static void PopulateListingPlayers(PlayerInfo playerInfo)
     {
-        if (playerInfo == null)
-            return;
+        if (CurrentPost == null) return;
 
-        int index = CurrentPost.contentIds.IndexOf(playerInfo.content_id);
-
-        if (index >= 0 && index < ExtractedPlayers.Count)
-        {
-            ExtractedPlayers[index] = playerInfo;
-
-            if (C.QueryTomestone)
-                Tomestone.GetPlayerProg(playerInfo, index);
-
-            // Trigger FFLogs fetch if configured and there's a mapping for this duty
-            var fflogsEncId = FFLogsEncounterMapping.GetFFLogsEncounterId(CurrentPost.dutyId);
-            if (fflogsEncId.HasValue
-                && P.FFLogsClient.IsConfigured
-                && P.FFLogsClient.IsTokenValid
-                && !playerInfo.name.IsNullOrEmpty())
-            {
-                var worldName = Util.WorldIdToName(playerInfo.world);
-                var capturedIndex = index;
-                var capturedInfo = playerInfo;
-                System.Threading.Tasks.Task.Run(async () =>
-                {
-                    var data = await P.FFLogsClient.FetchEncounterData(
-                        capturedInfo.name!, worldName, capturedInfo.world, fflogsEncId.Value);
-                    FFLogsResults[capturedIndex] = data;
-                });
-            }
-        }
-        else
-        {
-            Svc.Log.Debug($"ContentId {playerInfo.content_id} not found in ExtractedContentIds.");
-        }
+        var index = Array.FindIndex(ListingPlayers, p => p?.contentId == playerInfo.contentId);
+        
+        if (index != -1 && ListingPlayers[index] is { } p)
+            ListingPlayers[index] = p.merge(playerInfo);
     }
 
     public static void ResetExtractedData()
     {
-        //ExtractedContentIds = Enumerable.Repeat<ulong>(0, 8).ToList();
-        CurrentPost = new PostInfo(0, false, new List<ISharedImmediateTexture?>(), new List<IDalamudTextureWrap?>(), new List<ulong>());
-        ExtractedPlayers = Enumerable.Repeat<PlayerInfo?>(null, 8).ToList();
-        ProgPoints = Enumerable.Repeat<string?>(null, 8).ToList();
-        FFLogsResults = Enumerable.Repeat<FFLogsData?>(null, 8).ToList();
+        CurrentPost = new();
+        ListingPlayers = new PlayerInfo?[8];
     }
-
-    public record PlayerInfo
-    (
-        ulong content_id,
-        string? name,
-        ushort world,
-        string? lodestoneId = null
-    );
-
-    public record PostInfo
-    (
-        ushort dutyId,
-        bool isPrivate,
-        //List<byte> jobIds,
-        List<ISharedImmediateTexture?> jobIcons,
-        List<IDalamudTextureWrap?> roleIcons,
-        //List<JobFlags> acceptingJobs,
-        List<ulong> contentIds
-    );
-
-    public record FFLogsData
-    (
-        float? BestParse,
-        float? MedianParse,
-        int? Kills,
-        bool IsHidden = false
-    );
 }

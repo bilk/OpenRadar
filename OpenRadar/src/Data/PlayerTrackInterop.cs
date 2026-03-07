@@ -5,11 +5,7 @@ namespace OpenRadar;
 
 public static class PlayerTrackInterop
 {
-    public static bool Installed()
-    {
-        return Svc.PluginInterface.InstalledPlugins.Any(
-            x => x.InternalName == "PlayerTrack");
-    }
+    public static bool Installed() => Svc.PluginInterface.InstalledPlugins.Any(x => x.InternalName == "PlayerTrack");
 
     private static string? DatabasePath()
     {
@@ -22,14 +18,7 @@ public static class PlayerTrackInterop
 
     public static PlayerInfo? Extract(ulong contentId)
     {
-        if (contentId == 0)
-            return null;
-
-        if (!Installed())
-        {
-            Svc.Log.Warning($"PlayerTrack is not installed.");
-            return null;
-        }
+        if (!Installed() || contentId == 0) return null;
 
         var dbPath = DatabasePath();
         if (dbPath == null || !File.Exists(dbPath))
@@ -54,10 +43,8 @@ public static class PlayerTrackInterop
 
         var playerFound = reader.Read();
 
-        if (!playerFound)
-        {
-            return null;
-        }
+        if (!playerFound) return null;
+
         return new PlayerInfo 
             (
                 contentId, 

@@ -213,7 +213,7 @@ public static class Tomestone
 
             if (response.StatusCode == HttpStatusCode.Found && response.Headers.Location != null)
             {
-                string pattern = @"/character/(\d+)";
+                string pattern = @"/character/(\d+)"; 
                 var matchLodestone = Regex.Match(response.Headers.Location.ToString(), pattern);
                 if (matchLodestone.Success)
                     lodestoneId = matchLodestone.Groups[1].Value;
