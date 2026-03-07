@@ -63,7 +63,7 @@ public static class Database
                 WorldId = excluded.WorldId;
         ";
 
-        command.Parameters.AddWithValue("$contentId", (long)playerInfo.content_id);
+        command.Parameters.AddWithValue("$contentId", (long)playerInfo.contentId);
         command.Parameters.AddWithValue("$name", playerInfo.name);
         command.Parameters.AddWithValue("$worldId", playerInfo.world);
 

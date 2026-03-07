@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using Dalamud.Interface.Textures;
 using Dalamud.Interface.Textures.TextureWraps;
 using FFXIVClientStructs.FFXIV.Client.UI.Agent;
-using Openradar;
 
 namespace OpenRadar;
 
