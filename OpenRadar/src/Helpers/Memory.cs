@@ -1,16 +1,16 @@
 using System;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using Dalamud.Hooking;
 using Dalamud.Utility.Signatures;
-using OpenRadar.Tasks;
 using FFXIVClientStructs.FFXIV.Client.UI.Agent;
 
 namespace OpenRadar;
 
 public unsafe class Memory : IDisposable
 {
-
+    
     private delegate void RequestPlateInfoDelegate(ulong* thisPtr, ulong contentId);
-    [Signature("40 53 48 81 EC 80 0F 00 00 48 8B 05 ? ? ? ? 48 33 C4 48 89 84 24 70 0F 00 00 48 8B 0D ? ? ? ? 48 8B DA E8 ? ? ? ? 45 33 C9 C7 44 24 20 5E 03 00 00 45 33 C0 48 C7 44 24 28 20 00 00 00 48 8D 54 24 20 48 89 5C 24 40 48 8B C8 C7 44 24 48 01 00 00 00")]
     private RequestPlateInfoDelegate requestPlateInfoCall = null!;
 
     private delegate void FriendInfoPacketHandlerDelegate(ulong param_1, long* dataPtr, ulong param_3);
@@ -52,17 +52,38 @@ public unsafe class Memory : IDisposable
     public void PopulateListingDataDetour(AgentLookingForGroup* thisPtr, AgentLookingForGroup.Detailed* listingData)
     {
         CurrentPost = *listingData;
+        Tasker.Start();
         populateListingHook.Original(thisPtr, listingData);
     }
 
     public void RequestPlateInfo(ulong contentId)
-        => requestPlateInfoCall((ulong*)0, contentId);
+        => requestPlateInfoCall?.Invoke((ulong*)0, contentId);
+
+    private void ResolveRequestCharaCard() // Sig for request does not work with dalamud's sigscanner, so using address for OpenCharaCard then offset
+    {
+        var openAddr = AgentCharaCard.Addresses.OpenCharaCardForContentId.Value;
+        if (openAddr == IntPtr.Zero)
+            throw new Exception("OpenCharaCardForContentId not found");
+
+        var callAddr = openAddr + 0x58;
+        
+
+        int rel = *(int*)(callAddr + 0x1);
+        var target = callAddr + 0x5 + rel;
+        if (*(byte*)callAddr != 0xE8)
+            throw new Exception("CALL instruction not found");
+        Util.Log($"Open: {openAddr:X} - Call: {callAddr:X} - Target: {target:X} - Rel: {rel:X}");
+
+        requestPlateInfoCall = Marshal.GetDelegateForFunctionPointer<RequestPlateInfoDelegate>(target);
+    }
 
     public Memory()
     {
         Svc.Hook.InitializeFromAttributes(this);
-        Svc.Hook.HookFromAddress(AgentLookingForGroup.Addresses.PopulateListingData.Value,
+        populateListingHook = Svc.Hook.HookFromAddress(AgentLookingForGroup.Addresses.PopulateListingData.Value,
             new AgentLookingForGroup.Delegates.PopulateListingData(PopulateListingDataDetour));
+
+        ResolveRequestCharaCard();
         populateListingHook.Enable();
         friendInfoPacketHandlerHook.Enable();
         errorPacketHandlerHook.Enable();
@@ -71,13 +92,9 @@ public unsafe class Memory : IDisposable
 
     public void Dispose()
     {
-        friendInfoPacketHandlerHook.Disable();
-        friendInfoPacketHandlerHook.Dispose();
-        errorPacketHandlerHook.Disable();
-        errorPacketHandlerHook.Dispose();
-        charaCardPacketHandlerHook.Disable();
-        charaCardPacketHandlerHook.Dispose();
-        populateListingHook.Disable();
         populateListingHook.Dispose();
+        friendInfoPacketHandlerHook.Dispose();
+        errorPacketHandlerHook.Dispose();
+        charaCardPacketHandlerHook.Dispose();
     }
 }

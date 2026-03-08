@@ -28,6 +28,10 @@ public class MainWindow : Window
 
     public override void Draw()
     {
+        var LookingForGroupDetailPos = AddonHandler.addonPosition;
+        var windowPos = new Vector2(LookingForGroupDetailPos.X + AddonHandler.addonWidth, LookingForGroupDetailPos.Y);
+        ImGui.SetWindowPos(windowPos);
+
         if (ListingPlayers.Length == 0 || CurrentPost is not { } listing) return;
 
         if (listing.JoinConditionFlags.HasFlag(AgentLookingForGroup.JoinCondition.PrivateParty))
@@ -60,11 +64,13 @@ public class MainWindow : Window
             
             // ── Job Column ────────────────────────────────────────
             ImGui.TableNextColumn();
-            if (player == null)
+            if (player == null || player.contentId == 0)
             {
                 var roleTextureWrap = Util.JobFlagsToRoleTexture((JobFlags)listing.SlotFlags[i]);
                 if (roleTextureWrap != null)
+                {
                     ImEx.Image(roleTextureWrap, new(20,20));
+                }
                 ImGui.TableNextColumn();
                 ImEx.Text("-");
                 continue;
@@ -77,11 +83,11 @@ public class MainWindow : Window
             ImGui.TableNextColumn();
             ImEx.Text(name, Col.Cyan);
             ImEx.HoverToolTip("Open Tomestone Profile", true);
-            ImEx.ClickableTextLink($"https://tomestone.gg/charcter-name/{world}/{name}");
+            var worldName = Util.WorldIdToName(world);
+            ImEx.ClickableTextLink($"https://tomestone.gg/character-name/{worldName}/{name}");
 
             // ── World Column ────────────────────────────────────────
             ImGui.TableNextColumn();
-            var worldName = Util.WorldIdToName(world);
             if (!worldName.IsNullOrEmpty()) ImEx.Text(worldName);
 
             // ── Prog Column ────────────────────────────────────────
@@ -93,7 +99,7 @@ public class MainWindow : Window
                     "fresh" => (Col.Red, "Fresh"),
                     "done" => (Col.fGold, "Cleared"),
                     "hidden" => (Col.LowGrey, "Hidden"),
-                    _ => (Encounters.ProgToColour(prog, listing.DutyId), prog)
+                    _ => (Col.Cyan, prog)
                 };
                 ImEx.Text(text, colour);
             }

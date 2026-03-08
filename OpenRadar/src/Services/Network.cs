@@ -11,6 +11,6 @@ public static class Network
     public static void ListingHostExtract(IPartyFinderListing listing, IPartyFinderListingEventArgs args)
     {
         var playerInfo = new PlayerInfo(listing.ContentId, listing.Name.TextValue, (ushort)listing.HomeWorld.RowId);
-        Database.AddPlayer(playerInfo); 
+        _ = Database.AddPlayerORAsync(playerInfo); 
     }
 }

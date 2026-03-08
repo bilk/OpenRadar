@@ -47,13 +47,13 @@ public static partial class Util
     /// <summary>
     /// Prints data within given pointer to xllog. Allows for any type.
     /// </summary>
+    [Conditional("DEBUG")]
     public unsafe static void PrintData<T>(void* dataPtr, int totalRows = 10, int infoPerRow = 10) where T : unmanaged
     {
-#if DEBUG
         if (dataPtr == null) return;
         T* ptr = (T*)dataPtr;
 
-        Svc.Log.Debug("──────── Data Start ────────");
+        Log("──────── Data Start ────────");
         for (int row = 0; row < totalRows; row++)
         {
             string packetInfoRow = $"{row}: ";
@@ -62,11 +62,14 @@ public static partial class Util
                 T dataPoint = ptr[row * infoPerRow + col];
                 packetInfoRow += $"{dataPoint} ";
             }
-            Svc.Log.Debug(packetInfoRow);
+            Log(packetInfoRow);
         }
-        Svc.Log.Debug("──────── Data End ────────");
-#endif
+        Log("──────── Data End ────────");
     }
+
+    [Conditional("DEBUG")]
+    public static void Log(string message)
+        => Svc.Log.Debug(message);
 
     public unsafe static string ReadUtf8String(byte* b, int maxLength = 30, bool endAtNull = true)
     {
@@ -95,7 +98,7 @@ public static partial class Util
     public static string DutyIdToName(ushort dutyId)
     {
         var duty = Svc.Data.GetExcelSheet<ContentFinderCondition>().FirstOrNull(duty => duty.RowId == dutyId);
-        if (duty == null) return "Unknown Duty";
+        if (duty == null || dutyId == 0) return "Unknown Duty";
 
         var dutyName = duty.Value.Name.ToString();
         return char.ToUpper(dutyName[0]) + dutyName.Substring(1);

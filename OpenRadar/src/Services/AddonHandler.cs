@@ -18,7 +18,7 @@ public static class AddonHandler
         else
         {
             P.mainWindow.IsOpen = false;
-            Data.ResetExtractedData();
+            ResetExtractedData();
         }
     }
 

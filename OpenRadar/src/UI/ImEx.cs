@@ -28,7 +28,7 @@ public static class ImEx
        => Image(texture.GetWrapOrEmpty(), size);
 
     public static void Image(IDalamudTextureWrap texture, Vector2 size)
-        => ImGui.Image(texture.Handle, ImageSize(size), Vector2.Zero, Vector2.One, Vector4.One with { W = 0.50f });
+        => ImGui.Image(texture.Handle, ImageSize(size));
 
     public static void HoverToolTip(string message, bool handCursor = false)
     {

@@ -1,9 +1,8 @@
-﻿using OpenRadar.Windows;
+﻿using OpenRadar.UI;
 using ECommons.Configuration;
 using Dalamud.Game.Addon.Lifecycle;
 using ECommons.Automation.NeoTaskManager;
 using Dalamud.Game.Command;
-using OpenRadar.UI;
 
 namespace OpenRadar;
 
@@ -19,7 +18,6 @@ public sealed class OpenRadar : IDalamudPlugin
 
     public TaskManager taskManager = null!;
     public Memory Memory = null!;
-    public FFLogsClient FFLogsClient = null!;
 
     public OpenRadar(IDalamudPluginInterface pi)
     {
@@ -30,7 +28,6 @@ public sealed class OpenRadar : IDalamudPlugin
         config = EzConfig.Init<Configuration>();
 
         Memory = new();
-        FFLogsClient = new();
 
         windowSystem = new();
         mainWindow = new();
@@ -48,12 +45,6 @@ public sealed class OpenRadar : IDalamudPlugin
         Svc.PluginInterface.UiBuilder.OpenMainUi += () => { configWindow.IsOpen = true; };
         Svc.PluginInterface.UiBuilder.OpenConfigUi += () => { configWindow.IsOpen = true; };
 
-        if (C.FirstInstalled)
-        {
-            if (PlayerTrackInterop.Installed())
-                C.PlayerTrackReader = true;
-            configWindow.IsOpen = true;
-        }
 
         Svc.Commands.AddHandler("/openradar", new CommandInfo(OnCommand)
         {
@@ -64,7 +55,7 @@ public sealed class OpenRadar : IDalamudPlugin
     public void Dispose()
     {
         P.Memory.Dispose();
-        P.FFLogsClient.Dispose();
+        Database.Dispose();
         Svc.PluginInterface.UiBuilder.Draw -= windowSystem.Draw;
         Svc.PfGui.ReceiveListing -= Network.ListingHostExtract;
         Svc.Toasts.ErrorToast -= ToastHandler.ErrorToast;

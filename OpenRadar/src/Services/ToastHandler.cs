@@ -10,9 +10,8 @@ public static class ToastHandler
     {
         if (Util.ContainsSeString(message, "Plate"))
         {
-            // should create flag to state its querying pf post to prevent editing toast when not in use
-            isHandled=handled;
-            handled = false;
+            // this needs fixing, I have no clue how error toasts work
+            isHandled = false;
         }
     }
 }
