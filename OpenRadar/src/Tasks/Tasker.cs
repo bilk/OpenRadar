@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using ECommons.Throttlers;
 using FFXIVClientStructs.FFXIV.Client.UI.Agent;
 using FFXIVClientStructs.FFXIV.Client.UI.Misc;
+using FFXIVClientStructs.FFXIV.Component.GUI;
 using Serilog;
 
 namespace OpenRadar;
@@ -44,7 +45,7 @@ public static class Tasker
     private static async Task RequestPlayerInfo(ulong contentId)
     {
         await RequestGate.WaitAsync();
-
+   
         try
         {
             var info = await RequestCharaCardAsync(contentId);

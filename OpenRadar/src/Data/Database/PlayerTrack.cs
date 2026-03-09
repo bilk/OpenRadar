@@ -18,7 +18,7 @@ public static partial class Database
         // lazy initialisation causes ConnectPT to be called every LocalDB check fail, but is cheap enough to allow for this
         // especially as the user may install PlayerTrack while the plugin is mid operational, so its unnecessary to check anything            
 
-        var conn = new SQLiteConnection($"Data Source={path};Mode=ReadOnly;Cache=Shared");
+        var conn = new SQLiteConnection($"Data Source={path};Mode=ReadOnly;Cache=Shared"); // apparently cannot write if second connection writing, so just readonly
         conn.Open();
         return conn;
     }
