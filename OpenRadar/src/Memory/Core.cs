@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Dalamud.Hooking;
+using FFXIVClientStructs.FFXIV.Client.Game.UI;
 using FFXIVClientStructs.FFXIV.Client.UI.Agent;
 using FFXIVClientStructs.FFXIV.Client.UI.Misc;
 
@@ -14,11 +15,15 @@ public unsafe partial class Memory : IDisposable
     public Memory()
     {
         Svc.Hook.InitializeFromAttributes(this);
+
         populateListingHook = Svc.Hook.HookFromAddress(AgentLookingForGroup.Addresses.PopulateListingData.Value,
             new AgentLookingForGroup.Delegates.PopulateListingData(PopulateListingDataDetour));
+
         showLogMessageHook = Svc.Hook.HookFromAddress(RaptureLogModule.Addresses.ShowLogMessage.Value,
             new RaptureLogModule.Delegates.ShowLogMessage(showLogMessageDetour));
-        ResolveRequestCharaCard();
+
+        charaCardPacketHandlerHook = Svc.Hook.HookFromAddress(CharaCard.Addresses.HandleCurrentCharaCardDataPacket.Value,
+            new CharaCard.Delegates.HandleCurrentCharaCardDataPacket(CharaCardPacketHandlerDetour));
 
         EnableHooks();
     }

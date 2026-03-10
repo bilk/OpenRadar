@@ -2,6 +2,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using ECommons.Throttlers;
+using FFXIVClientStructs.FFXIV.Client.Game.UI;
 using FFXIVClientStructs.FFXIV.Client.UI.Agent;
 using FFXIVClientStructs.FFXIV.Client.UI.Misc;
 using FFXIVClientStructs.FFXIV.Component.GUI;
@@ -82,7 +83,7 @@ public static class Tasker
     private static async Task<PlayerInfo?> RequestCharaCardAsync(ulong contentId)
     {
         await Throttle("RequestCharaCard", 900);
-        var tcs = new TaskCompletionSource<PlayerInfo?>(TaskCreationOptions.RunContinuationsAsynchronously);
+        var tcs = new TaskCompletionSource<PlayerInfo?>();
 
         void Handler(PlayerInfo? info)
         {
@@ -95,7 +96,12 @@ public static class Tasker
 
         Memory.OnCharaCardReceived += Handler;
         Util.Log($"Requesting Characard: {contentId}");
-        await Svc.Framework.RunOnFrameworkThread(() => P.Memory.RequestPlateInfo(contentId));
+        await Svc.Framework.RunOnFrameworkThread(() => 
+        {
+            unsafe{
+                CharaCard.Instance()->RequestCharaCardForContentId(contentId);
+            }
+        });
         
         try
         {   
